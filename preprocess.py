@@ -2,12 +2,9 @@
 import numpy as np
 import pandas as pd
 
-DF_AIW = pd.read_excel('AIW-test.xlsx')#DataFrame of Author-Innovation-Weight
 
-
-DF_ATTA = pd.read_excel("ATTA.xlsx")#DataFrame of Author-Title-Time-Abstract
-DF_AI_part = DF_AIW[['Author','Innov']]#截取一部分拿来试验 拿几百条出来试验 我把中文列名都改成英文了 我怕出错
-DF_ATTA_part = DF_ATTA.head(82887);#作者-标题..表的部分数据
+DF_AI_part = pd.read_excel("AIW.xlsx", )#DataFrame of Author-Innovation 截取一部分拿来试验 拿几百条出来试验 我把中文列名都改成英文了 我怕出错
+DF_ATTA_part = pd.read_excel("ATTA.xlsx");#作者-标题..表的部分数据
 result = pd.DataFrame();#创建一个用于输出的结果集
 
 for i in range(0, len(DF_AI_part), 1):#遍历全部 作者-创新
