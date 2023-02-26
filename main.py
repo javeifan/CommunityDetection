@@ -17,7 +17,8 @@ def process(): #处理过程
     for i in range(0,len(df_AI),1):
         author = df_AI.iloc[i,0] #选取作者列
         innov = df_AI.iloc[i,1] #选取创新列
-        partResult = df_ATTA[df_ATTA['Author'].str.contains('Author')]
+        #找出 有作者是author 并且 标题或摘要中有该创新词 的 文章 ↓
+        partResult = df_ATTA[df_ATTA['Author'].str.contains(author) & (df_ATTA['Title'].str.contains(innov) | df_ATTA['Abstract'].str.contains(innov))]
     return
 
 
