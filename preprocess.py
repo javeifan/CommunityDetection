@@ -2,18 +2,11 @@
 import numpy as np
 import pandas as pd
 
+df_AI = pd.read_excel("AIW.xlsx");
+author = pd.read_excel("AIW.xlsx").iloc[25, 0]  # 第26行 第2列 这是一个str
+innov = pd.read_excel("AIW.xlsx").iloc[25, 1]
+print(author + ";" + innov )
+df_ATTA = pd.read_excel("ATTA.xlsx")
+partResult = df_ATTA[df_ATTA['Authors'].str.contains(author,case = False) & (df_ATTA['Title'].str.contains(innov,case = False) | df_ATTA['Abstract'].str.contains(innov,case = False))]
+print(partResult)
 
-DF_AI_part = pd.read_excel("AIW.xlsx", )#DataFrame of Author-Innovation 截取一部分拿来试验 拿几百条出来试验 我把中文列名都改成英文了 我怕出错
-DF_ATTA_part = pd.read_excel("ATTA.xlsx");#作者-标题..表的部分数据
-result = pd.DataFrame();#创建一个用于输出的结果集
-
-for i in range(0, len(DF_AI_part), 1):#遍历全部 作者-创新
-    df_thisAuthor =DF_ATTA_part.loc[DF_ATTA_part.Authors.str.contains(DF_AI_part['Author'][i],na = False)] #从作者-标题..表中取出所有该作者的作品
-    for index,row in df_thisAuthor.iterrows() :
-        temp_df = df_thisAuthor.loc[index]
-        result = pd.concat([result,temp_df],sort = False,axis=0,)
-
-#导出到新Result.xlsx中
-writer = pd.ExcelWriter("Result.xlsx")
-result.to_excel(writer)
-writer.save()
