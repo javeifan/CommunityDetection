@@ -11,6 +11,7 @@ import pandas as pd
 # print(partResult)
 
 df_AI = pd.read_excel("AIW.xlsx").iloc[:10]  # 读入 AIW.xlsx
-print(df_AI)
+df_AI.to_csv('Result1.csv')
+df_AI.to_excel('Result2.xlsx')
 
 #df_ATTA = pd.read_excel("ATTA.xlsx")  # 读入 ATTA.xlsx
