@@ -28,26 +28,23 @@ def Count_Year():  # 处理过程
         df_AI.to_excel(writer) #写入目标文件 格式为
     return
 
+#计算创新和作者的权重 这个版本是用循环去做 速度会比较慢
 def Count_Weight():
-    df_ID_Title = pd.read_excel("StatisticalWordsFrequency\ID-Title.xlsx");
-    df_ID_Weight = pd.read_excel("StatisticalWordsFrequency\ID-Weight.xlsx");
-    df_Innov_Weight = pd.read_excel("StatisticalWordsFrequency\Innov_Weight.xlsx");
+    df_ID_Title = pd.read_excel("StatisticalWordsFrequency\\ID-Title.xlsx")
+    df_ID_Weight = pd.read_excel("StatisticalWordsFrequency\\ID-Weight.xlsx")
+    df_Innov_Weight = pd.read_excel("StatisticalWordsFrequency\\Innov-Weight.xlsx")
 
     #1.对作者权重进行统计
-    for i in df_ID_Title.index:
-        print("ID : " + i) # 用于查看处理到第几行了
-        ID = df_ID_Title.iloc[i,0] #获取作者
+    for i in df_ID_Weight.index:
+        print("ID : " + str(i))  # 用于查看处理到第几行了
+        ID = df_ID_Weight.iloc[i,0].lower()#获取作者
 
-        df_ID_Weight_row = df_ID_Weight[df_ID_Weight['ID'].str.toLower() == ID] # 从作者权重表中找到那一行 精确匹配 且 大小写敏感为否
-
-        weight = df_ID_Weight_row.iloc['Weight'][df_ID_Weight_row.index[0]] # 获取其权重 权重已经预处理初始化为0
-        weight += 1 #自增1
-
-        df_ID_Weight_row.iloc['Weight'][df_ID_Weight_row.index[0]] = weight;# 赋值
+        weight = df_ID_Title[(df_ID_Title['ID'].str.lower() == ID)].size
+        df_ID_Weight.iloc[i,1] = df_ID_Title[(df_ID_Title['ID'].str.lower() == ID)].size
 
     #2.对创新权重进行统计
     for i in df_Innov_Weight.index:
-        print("Innov : " + i)
+        print("Innov : " + str(i))
         innov = df_Innov_Weight.iloc[i,0]
 
         df_Innov_Weight.iloc[i,1] = df_ID_Title['Title'].str.contains(innov, na=False,case = False).size
@@ -57,3 +54,16 @@ def Count_Weight():
         df_ID_Weight.to_excel()
     with pd.ExcelWriter("StatisticalWordsFrequency\Innov-Weight-Result.xlsx") as writer:  # 写出作者权重表
         df_ID_Weight.to_excel()
+
+#计算创新和作者的权重 这个版本是用向量化操作 运行得更快 如dataFrame的groupby()
+def Count_Weight1():
+    id_title_df = pd.read_excel("StatisticalWordsFrequency\\ID-Title.xlsx")
+    id_weight_df = pd.read_excel("StatisticalWordsFrequency\\ID-Weight.xlsx")
+
+    id_weight_df_unordered = pd.dataFrame(id_title_df.groupby(id_weight_df['ID']).size()) #根据id_title表的id列来分组 实际上id_title表和id_weight表id列所拥有的值域应该是一样的
+    print(id_weight_df_unordered)
+
+    with pd.ExcelWriter("StatisticalWordsFrequency\ID-Weight-Result.xlsx") as writer:
+        id_weight_df.to_excel();
+
+Count_Weight1()
