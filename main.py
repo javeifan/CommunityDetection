@@ -1,3 +1,4 @@
+
 import pandas as pd
 import numpy as np
 
@@ -55,15 +56,30 @@ def Count_Weight():
     with pd.ExcelWriter("StatisticalWordsFrequency\Innov-Weight-Result.xlsx") as writer:  # 写出作者权重表
         df_ID_Weight.to_excel()
 
-#计算创新和作者的权重 这个版本是用向量化操作 运行得更快 如dataFrame的groupby()
-def Count_Weight1():
+#计算作者的权重 这个版本是用pandas的批量化操作 运行得更快 在循环中使用pandas会比较慢  如dataFrame的groupby()
+def Count_ID_Weight():
     id_title_df = pd.read_excel("StatisticalWordsFrequency\\ID-Title.xlsx")
     id_weight_df = pd.read_excel("StatisticalWordsFrequency\\ID-Weight.xlsx")
 
-    id_weight_df_unordered = pd.dataFrame(id_title_df.groupby(id_weight_df['ID']).size()) #根据id_title表的id列来分组 实际上id_title表和id_weight表id列所拥有的值域应该是一样的
-    print(id_weight_df_unordered)
+
+    #处理作者权重
+    id_weight_df_unordered = id_title_df.groupby(['ID']).size().to_frame() #根据id_title表的id列来分组 实际上id_title表和id_weight表id列所拥有的值域应该是一样的
+    id_weight_merged_df = pd.merge(id_weight_df,id_weight_df_unordered,on = 'ID')
+    id_weight_merged_df.dropna(subset = ['ID'],inplace=True)
 
     with pd.ExcelWriter("StatisticalWordsFrequency\ID-Weight-Result.xlsx") as writer:
-        id_weight_df.to_excel();
+        id_weight_merged_df.to_excel(writer);
 
-Count_Weight1()
+#计算创新词的权重
+def Count_Innov_Weight():
+    id_title_df = pd.read_excel("StatisticalWordsFrequency\\ID-Title.xlsx")
+    innov_weight_df = pd.read_excel("StatisticalWordsFrequency\\ID-Weight.xlsx")
+    innov_list = innov_weight_df.iloc[:, 0].tolist()
+
+    innov_weight_list = [id_title_df['Title'].str.contains(innov, na=False, case=False).sum() for innov in innov_list]#
+    innov_weight_df.iloc[:, 1] = innov_weight_list
+
+    with pd.ExcelWriter("StatisticalWordsFrequency\Innov-Weight-Result.xlsx") as writer:
+        innov_weight_df.to_excel(writer)
+
+Count_Innov_Weight()
