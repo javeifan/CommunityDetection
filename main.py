@@ -24,7 +24,7 @@ def Count_Year():  # 处理过程
             if np.isnan(num) :
                 df_AI[year][i] = 1
             else:
-                df_AI[year] += 1;
+                df_AI[year] += 1
     with pd.ExcelWriter('Result.xlsx') as writer: #初始化一个Writer 输出器 用来输出文件
         df_AI.to_excel(writer) #写入目标文件 格式为
     return
@@ -64,16 +64,15 @@ def Count_ID_Weight():
 
     #处理作者权重
     id_weight_df_unordered = id_title_df.groupby(['ID']).size().to_frame() #根据id_title表的id列来分组 实际上id_title表和id_weight表id列所拥有的值域应该是一样的
-    id_weight_merged_df = pd.merge(id_weight_df,id_weight_df_unordered,on = 'ID')
-    id_weight_merged_df.dropna(subset = ['ID'],inplace=True)
+    id_weight_merged_df = pd.merge(id_weight_df,id_weight_df_unordered,how = 'left', on = 'ID')#以左边的源作者权重表 为准 与新计算出权重的表合并
 
-    with pd.ExcelWriter("StatisticalWordsFrequency\ID-Weight-Result.xlsx") as writer:
-        id_weight_merged_df.to_excel(writer);
+    with pd.ExcelWriter("StatisticalWordsFrequency\InnovWeightFullRes.xlsx") as writer:
+        id_weight_merged_df.to_excel(writer)
 
 #计算创新词的权重
 def Count_Innov_Weight():
     id_title_df = pd.read_excel("StatisticalWordsFrequency\\ID-Title.xlsx")
-    innov_weight_df = pd.read_excel("StatisticalWordsFrequency\\ID-Weight.xlsx")
+    innov_weight_df = pd.read_excel("StatisticalWordsFrequency\\Innov-Weight.xlsx")
     innov_list = innov_weight_df.iloc[:, 0].tolist()
 
     innov_weight_list = [id_title_df['Title'].str.contains(innov, na=False, case=False).sum() for innov in innov_list]#
@@ -82,4 +81,38 @@ def Count_Innov_Weight():
     with pd.ExcelWriter("StatisticalWordsFrequency\Innov-Weight-Result.xlsx") as writer:
         innov_weight_df.to_excel(writer)
 
-Count_Innov_Weight()
+def filter():
+    au_df = pd.read_excel("3.Filter\\作者节点.xlsx")
+    au_inn_year_df = pd.read_excel("3.Filter\\作者-创新-历年频次.xlsx")
+    edge_df = pd.read_excel("3.Filter\\边数据（作者-创新-频次）.xlsx")
+
+    part_au_inn_year_df = au_inn_year_df[au_inn_year_df['Author'].isin(au_df['Label'])]
+    part_edge_df = edge_df[edge_df['Source'].isin(au_df['Label'])]
+
+    with pd.ExcelWriter("3.Filter\\作者-创新-历年频次_part.xlsx") as writer:
+        part_au_inn_year_df.to_excel(writer)
+    with pd.ExcelWriter("3.Filter\\边数据（作者-创新-频次）_part.xlsx") as writer:
+        part_edge_df.to_excel(writer)
+
+def AddStartEnd():
+    edge_df = pd.read_excel("3.Filter\\边数据.xlsx")
+    au_inn_year_df = pd.read_excel("3.Filter\\作者-创新-历年频次1.xlsx")
+    au_inn_year_part_df = pd.read_excel("3.Filter\\作者-创新-历年频次_part.xlsx")
+
+    au_inn_year_ndarray = au_inn_year_df.values #转成ndarray 循环时比较高效
+    print(type(au_inn_year_ndarray))
+    start_series = pd.series()
+    end_series = pd.series()
+    for row in au_inn_year_ndarray:
+         min = 0
+         max = 0
+         for i in range(4,67) :
+            if np.isnan(row[i]) :
+                max = row[0]
+                if(min == 0) : min = row[0]
+            start_series = min
+            end_series = max
+    au_inn_year_ndarray['Start'] = start_series
+    au_inn_year_ndarray['End'] = end_series
+
+AddStartEnd()
