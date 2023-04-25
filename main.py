@@ -95,24 +95,28 @@ def filter():
         part_edge_df.to_excel(writer)
 
 def AddStartEnd():
-    edge_df = pd.read_excel("3.Filter\\边数据.xlsx")
+    #edge_df = pd.read_excel("3.Filter\\边数据.xlsx")
     au_inn_year_df = pd.read_excel("3.Filter\\作者-创新-历年频次1.xlsx")
-    au_inn_year_part_df = pd.read_excel("3.Filter\\作者-创新-历年频次_part.xlsx")
+    #au_inn_year_part_df = pd.read_excel("3.Filter\\作者-创新-历年频次_part.xlsx")
 
-    au_inn_year_ndarray = au_inn_year_df.values #转成ndarray 循环时比较高效
-    print(type(au_inn_year_ndarray))
-    start_series = pd.series()
-    end_series = pd.series()
-    for row in au_inn_year_ndarray:
-         min = 0
-         max = 0
+    start_series = pd.Series() #创建Start列 数据类型为series
+    end_series = pd.Series()
+
+    for row in au_inn_year_df.iterrows():
          for i in range(4,67) :
-            if np.isnan(row[i]) :
-                max = row[0]
-                if(min == 0) : min = row[0]
-            start_series = min
-            end_series = max
-    au_inn_year_ndarray['Start'] = start_series
-    au_inn_year_ndarray['End'] = end_series
+            thisrow = row[1]
+            if np.isnan(row[1][i]) :
+                max = i
+                if(min == 0) : min = row[1][i]
+         start_series.add(min)
+         end_series.add(max)
+         print(row)
+    au_inn_year_df['Start'] = start_series
+    au_inn_year_df['End'] = end_series
+
+    au_inn_year_result_startend = pd.dataFrame() #把ndarray转成dataframe
+
+    with pd.ExcelWriter("3.Filter\\作者-创新-历年频次-StartEnd.xlsx") as writer:
+        au_inn_year_df
 
 AddStartEnd()
